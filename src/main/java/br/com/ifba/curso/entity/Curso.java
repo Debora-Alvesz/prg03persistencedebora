@@ -34,6 +34,10 @@ public class Curso {
     // coluna ativo na tabela indica se o curso esta ativo ou não
     @Column (name = "ativo")
     private boolean ativo;
+    
+    // Cria uma coluna chamada "disponibilidade" na tabela "cursos"
+    @Column(name = "disponibilidade")
+    private String disponibilidade;
 
     //Métodos getters e setters
     public long getId() {
@@ -70,6 +74,14 @@ public class Curso {
 
     public void setCoordenador(String coordenador) {
         this.coordenador = coordenador;
+    }
+
+    public String getDisponibilidade() {
+        return disponibilidade;
+    }
+
+    public void setDisponibilidade(String disponibilidade) {
+        this.disponibilidade = disponibilidade;
     }
 
 

@@ -4,13 +4,23 @@
  */
 package br.com.ifba.curso.view;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.swing.JOptionPane;
+import br.com.ifba.curso.entity.Curso;
+
+
 public class CursoCadastro extends javax.swing.JFrame {
 
-    /**
-     * Creates new form CursoCadastro
-     */
+    private EntityManagerFactory emf;
+    private EntityManager em;
+    
     public CursoCadastro() {
         initComponents();
+        emf = Persistence.createEntityManagerFactory("prg03persistenciaPU");
+        em = emf.createEntityManager();
+
     }
 
     /**
@@ -29,10 +39,10 @@ public class CursoCadastro extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
+        txtNome = new javax.swing.JTextField();
+        txtCodigo = new javax.swing.JTextField();
         jComboBox1 = new javax.swing.JComboBox<>();
-        jButton1 = new javax.swing.JButton();
+        btnSalvar = new javax.swing.JButton();
         lblDescricao = new javax.swing.JLabel();
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -62,19 +72,24 @@ public class CursoCadastro extends javax.swing.JFrame {
         jLabel4.setText("Disponibilidade");
         jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 200, 110, 20));
         jPanel1.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 160, 310, 30));
-        jPanel1.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 80, 310, 30));
-        jPanel1.add(jTextField3, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 120, 310, 30));
+        jPanel1.add(txtNome, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 80, 310, 30));
+        jPanel1.add(txtCodigo, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 120, 310, 30));
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel1.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, 310, 30));
-
-        jButton1.setText("SALVAR");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Matutino", "Vespertino", "Integral", "Noturno" }));
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jComboBox1ActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 270, 80, 30));
+        jPanel1.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, 310, 30));
+
+        btnSalvar.setText("SALVAR");
+        btnSalvar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalvarActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnSalvar, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 270, 80, 30));
 
         lblDescricao.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         lblDescricao.setForeground(new java.awt.Color(0, 51, 51));
@@ -101,13 +116,49 @@ public class CursoCadastro extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
+ try {
+        // Cria um novo objeto Curso
+        Curso curso = new Curso();
+        curso.setNome(txtNome.getText());
+        curso.setCodigoCurso(txtCodigo.getText());
+        curso.setCoordenador(jTextField1.getText());
+        curso.setDisponibilidade(jComboBox1.getSelectedItem().toString());
 
-    /**
-     * @param args the command line arguments
-     */
+        // Inicia a transação
+        em.getTransaction().begin();
+        em.persist(curso); // salva o curso no banco
+        em.getTransaction().commit();
+
+        JOptionPane.showMessageDialog(this, "Curso salvo com sucesso!");
+
+        // Limpa os campos
+        jTextField1.setText("");
+        txtNome.setText("");
+        txtCodigo.setText("");
+        jComboBox1.setSelectedIndex(0);
+
+    } catch (Exception e) {
+        // Em caso de erro, cancela a transação
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
+        }
+        JOptionPane.showMessageDialog(this, "Erro ao salvar o curso: " + e.getMessage());
+        e.printStackTrace();
+    }
+    }//GEN-LAST:event_btnSalvarActionPerformed
+
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+
+  @Override
+public void dispose() {
+    super.dispose();
+    if (em != null) em.close();
+    if (emf != null) emf.close();
+}
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -141,7 +192,7 @@ public class CursoCadastro extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnSalvar;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
@@ -150,8 +201,8 @@ public class CursoCadastro extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
     private javax.swing.JLabel lblDescricao;
+    private javax.swing.JTextField txtCodigo;
+    private javax.swing.JTextField txtNome;
     // End of variables declaration//GEN-END:variables
 }
