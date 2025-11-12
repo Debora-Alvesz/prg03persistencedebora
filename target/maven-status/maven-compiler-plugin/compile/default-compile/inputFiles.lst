@@ -1,7 +1,12 @@
 C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\infrastructure\service\CursoService.java
+C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\infrastructure\dao\GenericDao.java
 C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\infrastructure\persistence\PersistenceManager.java
 C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\curso\view\CursoListar.java
+C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\curso\dao\CursoIDao.java
 C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\CursoSave.java
+C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\infrastructure\entity\PersistenceEntity.java
+C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\infrastructure\dao\GenericIDao.java
 C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\curso\view\components\BotaoRendererEditor.java
+C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\curso\dao\CursoDao.java
 C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\curso\view\CursoCadastro.java
 C:\Users\João Paulo\Documents\NetBeansProjects\prg03persistencia\src\main\java\br\com\ifba\curso\entity\Curso.java
