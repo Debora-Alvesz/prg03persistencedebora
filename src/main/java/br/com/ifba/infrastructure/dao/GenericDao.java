@@ -5,51 +5,55 @@ import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
-// Classe genérica que faz o CRUD funcionar de verdade usando o JPA
-public class GenericDao<T> implements GenericIDao<T> {
+// DAO genérico com métodos básicos de CRUD usando JPA
+public abstract class GenericDao<T> implements GenericIDao<T> {
 
-    // Gerenciador de entidades — é ele que fala com o banco de dados
+    // Gerenciador de entidades (JPA)
     protected EntityManager em;
 
-    // Construtor: cria o EntityManager com base no persistence.xml
+    // Inicializa o EntityManager usando o persistence.xml
     public GenericDao() {
-        em = Persistence.createEntityManagerFactory("prg03persistenciaPU").createEntityManager();
+        em = Persistence.createEntityManagerFactory("prg03persistenciaPU")
+                .createEntityManager();
     }
 
-    // Método para salvar um novo registro no banco
+    // Salva um novo registro e retorna o objeto salvo
     @Override
-    public void save(T entity) {
-        em.getTransaction().begin();
-        em.persist(entity);
-        em.getTransaction().commit();
+    public T save(T entity) {
+        em.getTransaction().begin();   // abre transação
+        em.persist(entity);            // salva no banco
+        em.getTransaction().commit();  // confirma
+        return entity;                 // devolve o objeto salvo
     }
 
-    // Método para atualizar um registro existente
+    // Atualiza um registro e retorna o objeto atualizado
     @Override
-    public void update(T entity) {
+    public T update(T entity) {
         em.getTransaction().begin();
-        em.merge(entity);
+        entity = em.merge(entity);     // merge retorna a versão gerenciada
         em.getTransaction().commit();
+        return entity;
     }
 
-    // Método para deletar um registro
+    // Remove um registro
     @Override
     public void delete(T entity) {
         em.getTransaction().begin();
-        em.remove(em.contains(entity) ? entity : em.merge(entity)); // se não estiver no contexto, faz merge
+
+        // Se o objeto não estiver gerenciado, faz merge antes de remover
+        em.remove(em.contains(entity) ? entity : em.merge(entity));
+
         em.getTransaction().commit();
     }
 
-    // Método que retorna todos os registros da tabela
+    // Retorna todos os registros da tabela
     @Override
     public List<T> findAll() {
-        String jpql = "from " + entityClass().getSimpleName();
+        String jpql = "FROM " + entityClass().getSimpleName();
         TypedQuery<T> query = em.createQuery(jpql, entityClass());
         return query.getResultList();
     }
 
-    // Método auxiliar — as classes filhas devem dizer qual é a entidade que representam
-    protected Class<T> entityClass() {
-        throw new UnsupportedOperationException("Defina entityClass() na subclasse!");
-    }
+    // As subclasses devem informar qual tipo de entidade representam
+    protected abstract Class<T> entityClass();
 }

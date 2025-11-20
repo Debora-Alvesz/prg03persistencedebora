@@ -1,38 +1,33 @@
 package br.com.ifba.curso.view;
 
-
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+ 
+import br.com.ifba.curso.controller.CursoController;
+import br.com.ifba.curso.controller.CursoIController;
+import br.com.ifba.curso.dao.CursoDao;
 import br.com.ifba.curso.view.components.BotaoRendererEditor;
 import br.com.ifba.curso.entity.Curso;
-import java.util.ArrayList;
+import br.com.ifba.curso.service.CursoService;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.TypedQuery;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 public class CursoListar extends javax.swing.JFrame {
-    // Gerenciadores de entidade JPA
-    private EntityManager em;
-    private EntityManagerFactory emf;
-    /**
-     * Creates new form teste
-     */
+  
+    private CursoIController controller;
+
     public CursoListar() {
-        // Inicializa JPA criando o EntityManagerFactory com a unidade de persistência definida
-        emf = Persistence.createEntityManagerFactory("prg03persistenciaPU");
-        // Cria o EntityManager para operações no banco de dados
-        em = emf.createEntityManager();
-        
-        initComponents();
-        configurarTabela();
-        carregarDados();
-    }
+    initComponents();
+
+    controller = new CursoController(
+        new CursoService(
+            new CursoDao()
+        )
+    );
+
+    configurarTabela();
+    carregarDados();
+}
+
         //Configura a tabela de cursos com colunas personalizadas e botões editar e remover
         private void configurarTabela() {
         DefaultTableModel model = new DefaultTableModel(
@@ -86,99 +81,48 @@ public class CursoListar extends javax.swing.JFrame {
     }
     //Busca cursos por nome no banco de dados
     private List<Curso> buscarPorNome(String nome) {
-        try {
-            // Cria a consulta JPQL para busca por nome
-            String jpql = "SELECT c FROM Curso c WHERE c.nome LIKE :nome";
-            TypedQuery<Curso> query = em.createQuery(jpql, Curso.class);
-            query.setParameter("nome", "%" + nome + "%");
-            return query.getResultList();
-        } catch (Exception e) {
-            // Mostra mensagem de erro em caso de falha
-            JOptionPane.showMessageDialog(this, "Erro ao buscar cursos: " + e.getMessage());
-            return new ArrayList<>();
-        }
+    return controller.findByName(nome);
     }
+
     
     //Busca todos os cursos cadastrados no banco de dados.
-    private List<Curso> buscarTodos() {
-        try {
-            // Cria consulta JPQL para buscar todos os cursos
-            String jpql = "SELECT c FROM Curso c";
-            TypedQuery<Curso> query = em.createQuery(jpql, Curso.class);
-            // Executa a consulta e retorna os resultados
-            return query.getResultList();
-        } catch (Exception e) {
-            // Mostra mensagem de erro em caso de falha
-            JOptionPane.showMessageDialog(this, "Erro ao buscar cursos: " + e.getMessage());
-            return new ArrayList<>();
-        }
+   private List<Curso> buscarTodos() {
+    return controller.findAll();
     }
+
 
 public void removerCurso(long id) {
-    try {
-        // Inicia transação
-        em.getTransaction().begin();
-        // Busca o curso pelo ID
-        Curso curso = em.find(Curso.class, id);
-        
-        // Remove o curso se encontrar
-        if (curso != null) {
-            em.remove(curso);
-            em.getTransaction().commit();
-            JOptionPane.showMessageDialog(this, "Curso removido com sucesso!");
-            carregarDados(); // Atualiza a tabela
-        } else {
-            // Cancela a transação se não encrontrar o curso
-            em.getTransaction().rollback();
-            JOptionPane.showMessageDialog(this, "Curso não encontrado!");
-        }
-    } catch (Exception e) {
-        // Em caso de erro, cancela a transação se estiver ativa
-        if (em.getTransaction().isActive()) {
-            em.getTransaction().rollback();
-        }
-        JOptionPane.showMessageDialog(this, "Erro ao remover curso: " + e.getMessage());
-        e.printStackTrace();
+    if (controller.delete(id)) {
+        JOptionPane.showMessageDialog(this, "Curso removido com sucesso!");
+        carregarDados();
+    } else {
+        JOptionPane.showMessageDialog(this, "Não foi possível remover o curso!");
     }
-}
+    }
+
 
 public void editarCurso(long id) {
-    try {
-        // Busca o curso pelo ID
-        Curso curso = em.find(Curso.class, id);
 
-        if (curso != null) {
-            // Pede os novos dados ao usuário (mantém os antigos como sugestão)
-            String novoNome = JOptionPane.showInputDialog(this, "Novo nome:", curso.getNome());
-            String novoCoordenador = JOptionPane.showInputDialog(this, "Novo coordenador:", curso.getCoordenador());
-            String novaDisponibilidade = JOptionPane.showInputDialog(this, "Nova disponibilidade:", curso.getDisponibilidade());
+    Curso curso = controller.findById(id);
+    
+    if (curso == null) {
+        JOptionPane.showMessageDialog(this, "Curso não encontrado!");
+        return;
+    }
 
-            // Só continua se o usuário não cancelar
-            if (novoNome != null && novoCoordenador != null && novaDisponibilidade != null) {
-                em.getTransaction().begin();
+    String novoNome = JOptionPane.showInputDialog(this, "Novo nome:", curso.getNome());
+    String novoCoordenador = JOptionPane.showInputDialog(this, "Novo coordenador:", curso.getCoordenador());
+    String novaDisponibilidade = JOptionPane.showInputDialog(this, "Nova disponibilidade:", curso.getDisponibilidade());
 
-                // Atualiza os valores
-                curso.setNome(novoNome);
-                curso.setCoordenador(novoCoordenador);
-                curso.setDisponibilidade(novaDisponibilidade);
+    if (novoNome != null && novoCoordenador != null && novaDisponibilidade != null) {
 
-                em.merge(curso); // Atualiza no banco
-                em.getTransaction().commit();
+        curso.setNome(novoNome);
+        curso.setCoordenador(novoCoordenador);
+        curso.setDisponibilidade(novaDisponibilidade);
 
-                JOptionPane.showMessageDialog(this, "Curso atualizado com sucesso!");
-                carregarDados(); // Recarrega a tabela
-            }
-
-        } else {
-            JOptionPane.showMessageDialog(this, "Curso não encontrado!");
-        }
-
-    } catch (Exception e) {
-        if (em.getTransaction().isActive()) {
-            em.getTransaction().rollback();
-        }
-        JOptionPane.showMessageDialog(this, "Erro ao editar curso: " + e.getMessage());
-        e.printStackTrace();
+        controller.update(curso);
+        JOptionPane.showMessageDialog(this, "Curso atualizado!");
+        carregarDados();
     }
 }
 
@@ -302,22 +246,12 @@ public void editarCurso(long id) {
         carregarDados();
     }
 
-    @Override
+   @Override
     public void dispose() {
-        
         super.dispose();
-         // Fecha o EntityManager se estiver aberto
-        if (em != null) { // Libera os recursos do EntityManager
-            em.close(); 
-        }
-        // Fecha o EntityManagerFactory se estiver aberto
-        if (emf != null) { // Libera os recursos do EntityManagerFactory
-            emf.close();
-        }
     }
-    /**
-     * @param args the command line arguments
-     */
+   
+  
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -360,6 +294,4 @@ public void editarCurso(long id) {
     private javax.swing.JTable tblCursos;
     private javax.swing.JTextField txtPesquisar;
     // End of variables declaration//GEN-END:variables
-
-  
 }

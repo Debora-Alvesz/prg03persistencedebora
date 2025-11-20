@@ -4,16 +4,19 @@ import java.util.List;
 
 // Interface genérica para operações de CRUD (Create, Read, Update, Delete)
 public interface GenericIDao<T> {
-    
-    // Salva um novo registro no banco
-    void save(T entity);
-    
-    // Atualiza um registro existente
-    void update(T entity);
-    
-    // Remove um registro do banco
+
+    // Salvar retorna o objeto salvo
+    T save(T entity);
+
+    // Atualizar retorna o objeto atualizado
+    T update(T entity);
+
+    // Deletar continua void
     void delete(T entity);
-    
-    // Retorna todos os registros de uma tabela
+
+    // Buscar todos
     List<T> findAll();
+
+    // Buscar por ID
+    T findById(Long id);
 }
