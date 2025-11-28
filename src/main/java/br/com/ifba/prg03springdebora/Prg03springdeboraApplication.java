@@ -5,9 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = "br.com.ifba")
 @EntityScan(basePackages = "br.com.ifba.curso.entity")
+@EnableJpaRepositories(basePackages = "br.com.ifba.curso.repository")
 
 public class Prg03springdeboraApplication {
 

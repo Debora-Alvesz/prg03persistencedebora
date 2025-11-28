@@ -4,9 +4,9 @@
  */
 package br.com.ifba.curso.view;
 
+import br.com.ifba.curso.controller.CursoIController;
 import javax.swing.JOptionPane;
 import br.com.ifba.curso.entity.Curso;
-import br.com.ifba.curso.service.CursoService;
 import javax.swing.JFrame;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class CursoCadastro extends JFrame {
     
     @Autowired
-    private CursoService cursoService;
+    private CursoIController controller;
 
     @Autowired
     private ApplicationContext context;
@@ -122,32 +122,28 @@ public class CursoCadastro extends JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
-    try {
+   try {
         Curso curso = new Curso();
+        // ... (coleta de dados)
         curso.setNome(txtNome.getText().trim());
         curso.setCodigoCurso(txtCodigo.getText().trim());
         curso.setCoordenador(jTextField1.getText().trim());
         curso.setDisponibilidade(jComboBox1.getSelectedItem().toString());
 
-        // Validação
+        // A View faz apenas a validação de coleta (se campos estão vazios)
         if (curso.getNome().isEmpty() || curso.getCodigoCurso().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Preencha nome e código antes de salvar.");
-            return;
+             JOptionPane.showMessageDialog(this,
+                     "Preencha nome e código antes de salvar.");
+             return;
         }
 
-        // Verifica duplicidade via SERVICE
-        if (cursoService.existeByCodigo(curso.getCodigoCurso())) {
-            JOptionPane.showMessageDialog(this,
-                    "Já existe um curso com esse código.");
-            return;
-        }
-
-        // Salva
-        cursoService.saveCurso(curso);
-        JOptionPane.showMessageDialog(this, "Curso salvo com sucesso!");
-        limparCampos(); //limpa os blocos da tela de cadastro após finalizar o cadastro
+        // DELEGAÇÃO: Chama APENAS o Controller.
+        // O Controller chamará o Service, que contém a Regra de Negócio (unicidade)
+        controller.save(curso);
         
+        JOptionPane.showMessageDialog(this, "Curso salvo com sucesso!");
+        limparCampos();
+
         // Abre tela lista e fecha a atual
         CursoListar telaListar = context.getBean(CursoListar.class);
         telaListar.atualizarLista();
@@ -155,6 +151,7 @@ public class CursoCadastro extends JFrame {
         this.dispose();
 
     } catch (Exception e) {
+        // Captura a exceção lançada pela Camada Service (p. ex., código duplicado)
         JOptionPane.showMessageDialog(this,
                 "Erro ao salvar o curso: " + e.getMessage());
         e.printStackTrace();
