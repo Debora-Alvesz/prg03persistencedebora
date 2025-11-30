@@ -7,7 +7,9 @@ package br.com.ifba.curso.view;
 import br.com.ifba.curso.controller.CursoIController;
 import javax.swing.JOptionPane;
 import br.com.ifba.curso.entity.Curso;
+import jakarta.annotation.PostConstruct;
 import javax.swing.JFrame;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -16,20 +18,23 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j // Adiciona o objeto 'log'
+@RequiredArgsConstructor
 
 public class CursoCadastro extends JFrame {
     
-    @Autowired
-    private CursoIController controller;
-    
-    @Autowired
-    private ApplicationContext context;
+    private final CursoIController controller; 
+    private final ApplicationContext context;
 
-    //construtor
-    public CursoCadastro() {
+    @PostConstruct
+    public void init() {
+        // Log de Informação ao iniciar a tela de cadastro
+        log.info("Tela de cadastro de cursos inicializada.");
+        
+        // Inicializa os componentes gráficos APÓS a injeção.
         initComponents();
+        
     }
-
+    
     public void limparCampos() {
     txtNome.setText("");
     txtCodigo.setText("");

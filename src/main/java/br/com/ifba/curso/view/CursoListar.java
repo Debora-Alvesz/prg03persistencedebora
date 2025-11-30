@@ -9,7 +9,7 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
@@ -17,20 +17,22 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+
 public class CursoListar extends JFrame {
   
-    @Autowired
-    private CursoIController controller;
-
-    @Autowired
-    private ApplicationContext context;
+    private final CursoIController controller;
+    private final ApplicationContext context;
 
     //construtor
-    public CursoListar() {
-    // Inicializa os componentes gráficos (botões, tabela, etc.)
-    initComponents();
-    configurarTabela();
-}
+    public CursoListar(CursoIController controller, ApplicationContext context) {
+        
+        this.controller = controller; 
+        this.context = context;
+        
+        // Inicializa os componentes gráficos APÓS a injeção de dependências.
+        initComponents();
+        configurarTabela();
+    }
     // Chama carregar dados depois que o Spring injetar o bean
     @PostConstruct
     public void initAfterInjection() {
