@@ -4,12 +4,21 @@ import br.com.ifba.infrastructure.entity.PersistenceEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.NoArgsConstructor; 
+import lombok.AllArgsConstructor; 
+import lombok.Data;
 
 // Indica que essa classe é uma entidade JPA e será mapeada para uma tabela no banco
 @Entity
 // Define o nome da tabela no banco de dados como "cursos"
 @Table(name = "cursos")
-public class Curso extends PersistenceEntity { // Herdando o ID da classe PersistenceEntity
+@NoArgsConstructor // ️ GERA O CONSTRUTOR VAZIO (essencial para JPA)
+@AllArgsConstructor //  GERA O CONSTRUTOR COM TODOS OS CAMPOS
+@Data
+
+public class Curso extends PersistenceEntity {// Herdando o ID da classe PersistenceEntity
+
+    // O ID (id) é herdado de PersistenceEntity. Não precisamos de anotação de acesso aqui 
 
     // Coluna "nome" na tabela, não pode ser nula
     @Column(name = "nome", nullable = false)
@@ -31,55 +40,4 @@ public class Curso extends PersistenceEntity { // Herdando o ID da classe Persis
     @Column(name = "disponibilidade")
     private String disponibilidade;
 
-    // ----- Getters e Setters -----
-
-    // Retorna o nome do curso
-    public String getNome() {
-        return nome;
-    }
-
-    // Define o nome do curso
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    // Retorna o código do curso
-    public String getCodigoCurso() {
-        return codigoCurso;
-    }
-
-    // Define o código do curso
-    public void setCodigoCurso(String codigoCurso) {
-        this.codigoCurso = codigoCurso;
-    }
-
-    // Retorna o coordenador do curso
-    public String getCoordenador() {
-        return coordenador;
-    }
-
-    // Define o coordenador do curso
-    public void setCoordenador(String coordenador) {
-        this.coordenador = coordenador;
-    }
-
-    // Retorna se o curso está ativo
-    public boolean isAtivo() {
-        return ativo;
-    }
-
-    // Define se o curso está ativo
-    public void setAtivo(boolean ativo) {
-        this.ativo = ativo;
-    }
-
-    // Retorna a disponibilidade do curso
-    public String getDisponibilidade() {
-        return disponibilidade;
-    }
-
-    // Define a disponibilidade do curso
-    public void setDisponibilidade(String disponibilidade) {
-        this.disponibilidade = disponibilidade;
-    }
 }

@@ -11,17 +11,21 @@ import javax.swing.JFrame;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Component
+@Slf4j // Adiciona o objeto 'log'
+
 public class CursoCadastro extends JFrame {
     
     @Autowired
     private CursoIController controller;
-
+    
     @Autowired
     private ApplicationContext context;
 
+    //construtor
     public CursoCadastro() {
         initComponents();
     }
@@ -31,7 +35,7 @@ public class CursoCadastro extends JFrame {
     txtCodigo.setText("");
     jTextField1.setText("");
     jComboBox1.setSelectedIndex(0); // volta para a primeira opção
-}
+} 
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -139,10 +143,14 @@ public class CursoCadastro extends JFrame {
 
         // DELEGAÇÃO: Chama APENAS o Controller.
         // O Controller chamará o Service, que contém a Regra de Negócio (unicidade)
-        controller.save(curso);
+       controller.save(curso);
+
+       log.info("Curso salvo com sucesso. Nome: {}", curso.getNome()); // ✅ Log de sucesso
         
-        JOptionPane.showMessageDialog(this, "Curso salvo com sucesso!");
-        limparCampos();
+       log.info("Curso salvo com sucesso. Atualizando lista."); // Log no sucesso
+
+            JOptionPane.showMessageDialog(this, "Curso salvo com sucesso!");
+            limparCampos();
 
         // Abre tela lista e fecha a atual
         CursoListar telaListar = context.getBean(CursoListar.class);
@@ -151,10 +159,12 @@ public class CursoCadastro extends JFrame {
         this.dispose();
 
     } catch (Exception e) {
-        // Captura a exceção lançada pela Camada Service (p. ex., código duplicado)
-        JOptionPane.showMessageDialog(this,
-                "Erro ao salvar o curso: " + e.getMessage());
-        e.printStackTrace();
+        // Captura a exceção lançada pela Camada Service
+       // ✅ ADICIONAR: Log o erro detalhado
+        log.error("Falha ao salvar o curso no sistema. Erro: {}", e.getMessage(), e); 
+
+        // Mensagem para o usuário final
+        JOptionPane.showMessageDialog(this, "Erro ao salvar o curso: " + e.getMessage());
     }
     }//GEN-LAST:event_btnSalvarActionPerformed
 

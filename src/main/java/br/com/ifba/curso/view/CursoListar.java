@@ -12,9 +12,11 @@ import javax.swing.table.DefaultTableModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Component
+@Slf4j
 public class CursoListar extends JFrame {
   
     @Autowired
@@ -32,9 +34,10 @@ public class CursoListar extends JFrame {
     // Chama carregar dados depois que o Spring injetar o bean
     @PostConstruct
     public void initAfterInjection() {
+        // Log de Informação ao iniciar
+        log.info("Tela de listagem de cursos inicializada. Carregando dados iniciais."); 
         carregarDados();
     }
-
         //Configura a tabela de cursos com colunas personalizadas e botões editar e remover
         private void configurarTabela() {
         DefaultTableModel model = new DefaultTableModel(
@@ -94,25 +97,36 @@ public class CursoListar extends JFrame {
     
     //Busca todos os cursos cadastrados no banco de dados.
    private List<Curso> buscarTodos() {
+    // Registra no sistema que a operação de busca de cursos foi iniciada.
+    log.debug("Buscando todos os cursos no Controller.");
     return controller.findAll();
     }
 
 
 public void removerCurso(long id) {
+    // Registra um aviso (WARN) antes de uma ação destrutiva (remoção). 
+    // Nível WARN: Indica algo importante que aconteceu, mas que não parou o sistema.
+    log.warn("Tentativa de remoção do curso ID: {}", id);
     
-    // Tenta deletar o curso chamando o método 'delete' do controller,
-    // passando o ID do curso a ser removido.
-    // Presume-se que 'controller.delete(id)' retorna 'true' se a operação for bem-sucedida.
+    // Tenta deletar o curso chamando o Controller. O Controller retorna 'true' em caso de sucesso.
     if (controller.delete(id)) {
         
+        // Registra uma informação (INFO) no sistema sobre a conclusão da exclusão.
+        // Nível INFO: Confirma que uma ação importante foi concluída com sucesso.
+        log.info("Curso ID {} removido com sucesso.", id);
+
         //Notifica o usuário com uma mensagem de sucesso se a exclusão foi bem sucedida.
         JOptionPane.showMessageDialog(this, "Curso removido com sucesso!");
         
         //Recarrega os dados na tabela para refletir a remoção.
         carregarDados();
     } else {
-        // Se o controller.delete(id) retornou 'false' (ou houve uma exceção não tratada
-        // que resultou em falha):
+        // Se o controller.delete(id) retornou 'false' (ou houve uma exceção não tratada que resultou em falha)
+        
+        
+        // Registra um erro (ERROR) no sistema, indicando uma falha na operação.
+        // Nível ERROR: Alerta sobre uma falha que precisa ser investigada (semelhante ao que fizemos no 'catch' do Cadastro).
+        log.error("Falha na remoção do curso ID: {}. Controller retornou FALSE.", id);
         
         // Notifica o usuário que a remoção não foi possível.
         JOptionPane.showMessageDialog(this, "Não foi possível remover o curso!");
@@ -121,46 +135,51 @@ public void removerCurso(long id) {
 
 
 public void editarCurso(long id) {
+    // Registra que a tentativa de edição foi iniciada.
+    log.info("Iniciando processo de edição para o curso ID: {}", id); 
 
-    // 1. Busca o curso a ser editado usando o ID. O Controller delega essa busca ao Service/Repository.
-    Curso curso = controller.findById(id);
-    
-    // 2. Verifica se o curso foi realmente encontrado.
-    if (curso == null) {
-        // Se o curso for nulo (não encontrado no banco de dados):
+    // 1. Busca o objeto Curso no banco de dados usando o ID.
+     Curso curso = controller.findById(id);
+
+    // 2. Verifica se o curso foi encontrado. Se for 'null', significa que não existe.
+        if (curso == null) {
         
-        // Notifica o usuário e interrompe a execução do método (return).
-        JOptionPane.showMessageDialog(this, "Curso não encontrado!");
-        return;
+            // Registra o erro no sistema, já que o objeto esperado não foi encontrado.
+        log.error("Curso ID {} não encontrado para edição.", id); 
+        
+            // Notifica o usuário final.
+            JOptionPane.showMessageDialog(this, "Curso não encontrado!");
+        
+            // Interrompe a execução do método, pois não há curso para editar.
+            return;
+        }
+        String novoNome = JOptionPane.showInputDialog(this, "Novo nome:", curso.getNome());
+        String novoCoordenador = JOptionPane.showInputDialog(this, "Novo coordenador:", curso.getCoordenador());
+        String novaDisponibilidade = JOptionPane.showInputDialog(this, "Nova disponibilidade:", curso.getDisponibilidade());
+        
+            //lógica de pop-ups e coleta de dados, que é onde o usuário insere as mudanças
+
+            // 3. Verifica se o usuário não cancelou a edição (se todos os campos retornaram valores não nulos).
+            if (novoNome != null && novoCoordenador != null && novaDisponibilidade != null) {
+        
+            //atualização do objeto Curso com os novos valores
+            curso.setNome(novoNome.trim());
+            curso.setCoordenador(novoCoordenador.trim());
+            curso.setDisponibilidade(novaDisponibilidade);
+            
+            // 4. Envia o objeto atualizado de volta para o Controller/Service salvar as mudanças.
+            controller.update(curso);   
+            
+            // Registra o sucesso da atualização no sistema.
+            log.info("Curso ID {} atualizado com sucesso.", id); 
+        
+            // Notifica o usuário final.
+            JOptionPane.showMessageDialog(this, "Curso atualizado!");
+        
+            // Recarrega a tabela para mostrar o curso com os novos dados.
+            carregarDados();
+            }
     }
-
-    // 3. Captura os novos dados do usuário usando janelas de input (pop-ups).
-    // O valor atual do curso (curso.getNome(), etc.) é usado como valor padrão na caixa de diálogo.
-    String novoNome = JOptionPane.showInputDialog(this, "Novo nome:", curso.getNome());
-    String novoCoordenador = JOptionPane.showInputDialog(this, "Novo coordenador:", curso.getCoordenador());
-    String novaDisponibilidade = JOptionPane.showInputDialog(this, "Nova disponibilidade:", curso.getDisponibilidade());
-
-    // 4. Validação simples: verifica se o usuário não cancelou nenhum dos pop-ups.
-    // Se o usuário clicar em 'Cancelar' em qualquer JOptionPane, a variável recebe 'null'.
-    if (novoNome != null && novoCoordenador != null && novaDisponibilidade != null) {
-
-        // 5. Se os dados forem válidos (não nulos), atualiza o objeto Curso com os novos valores.
-        curso.setNome(novoNome);
-        curso.setCoordenador(novoCoordenador);
-        curso.setDisponibilidade(novaDisponibilidade);
-
-        // 6. Envia o objeto Curso atualizado para a camada de persistência salvar as mudanças.
-        controller.update(curso);
-        
-        // 7. Notifica o usuário sobre a atualização bem-sucedida.
-        JOptionPane.showMessageDialog(this, "Curso atualizado!");
-        
-        // 8. Recarrega os dados na tabela para mostrar o curso com as novas informações.
-        carregarDados();
-    }
-    // Se o usuário clicou em 'Cancelar' (ou fechou) em algum JOptionPane, o bloco 'if' é ignorado
-    // e o método termina sem fazer nenhuma alteração.
-}
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
